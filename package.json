@@ -12,10 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.17.1",
-    "body-parser": "^1.18.2",
-    "express": "^4.16.2",
-    "node-fetch": "^1.7.3",
-    "node-rest-client": "^3.1.0",
     "readline-sync": "^1.4.7"
   }
 }

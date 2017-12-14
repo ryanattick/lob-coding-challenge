@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 const readlineSync = require('readline-sync');
-// const {API_KEY} = require('./googleAPI.config');
+const {API_KEY} = require('./googleAPI.config');
 const axios = require('axios');
 
 let apiResponse;
 
-// const axios = require('axios');
 axios.get('https://jsonplaceholder.typicode.com/posts')
-  .then(res => {
-    console.log(res.data)
+  .then(function(response) {
+    apiResponse = response;
+    console.log('Does this work?')
   })
+  .catch(function (error) {
+    console.log(error, 'Error');
+  });
+
+console.log('apiResponse: ', apiResponse);
 
 
-
-
-
-// https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyAiuO_Aq2nxSbStdPg6eZ9TAYsqGWMrOw8&address=1263%20Pacific%20Ave.%20Kansas%20City%20KS
+// https://www.googleapis.com/civicinfo/v2/representatives?key=${API_KEY}&address=1263%20Pacific%20Ave.%20Kansas%20City%20KS
 //
 // https://www.googleapis.com/civicinfo/v2/elections?key=${API_KEY}
 
