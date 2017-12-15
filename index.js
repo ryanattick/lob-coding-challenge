@@ -1,48 +1,88 @@
 #!/usr/bin/env node
+
+//THINK ABOUT BREAKING THE DIFFERENT PIECES INTO DIFFERENT FILES!!
 const readlineSync = require('readline-sync');
 const {API_KEY} = require('./googleAPI.config');
 const axios = require('axios');
 
-let apiResponse, senderNameConfirm;
+let apiResponse, senderNameConfirm, addressConfirm, electedOfficial, senderZipCode, senderState, senderCity, senderStreet, officialTitle, validOfficialToContact, officialTitleForResponse;
+let containerForMultipleResults = [];
 
-// https://www.googleapis.com/civicinfo/v2/representatives?key=${API_KEY}&address=1263%20Pacific%20Ave.%20Kansas%20City%20KS
-//
-// https://www.googleapis.com/civicinfo/v2/elections?key=${API_KEY}
+let senderName = readlineSync.question(`Hello! I'm here to help you write a letter to your legislator about an issue you care about. Let's get started. What is your first and last name? `);
 
+while (senderNameConfirm === undefined || senderNameConfirm === false) {
+  let nameVerification = readlineSync.question(`It's nice to meet you ${senderName}! Did I get your name right? `);
+  if (nameVerification.toLowerCase() === 'no') {
+    senderName = readlineSync.question(`I'm sorry! Let's try that again. Please enter your first and last name. `)
+    senderNameConfirm = false;
+  } else if (nameVerification.toLowerCase() === 'yes') {
+    senderNameConfirm = true;
+  } else {
+    let invalidNameConfirmationResponse = readlineSync.question(`Hmm. I didn't catch that. Try answering with 'yes' or 'no'. Are you ${senderName}? `);
+   if (invalidNameConfirmationResponse.toLowerCase() === 'no') {
+     senderNameConfirm = false;
+   } else if (invalidNameConfirmationResponse.toLowerCase() === 'yes') {
+     senderNameConfirm = true;
+   }
+  }
+ }
 
+console.log(`I got it! Great! Let's make some social change. First, I'll need to where the letter is coming from.`)
 
-// let senderName = readlineSync.question("Hello! I'm here to help you write a letter to your legislator about an issue you care about. Let's get started. What is your first and last name? ");
-//
-// if (readlineSync.question(`It's nice to meet you ${senderName}! Did I get your name right? `).toLowerCase() === 'no') {
-//   senderNameConfirm = false;
-// } else {
-//   senderNameConfirm = true;
-// }
-//
-// while (!senderNameConfirm) {
-//   senderName = readlineSync.question("Oh no! I'm sorry. Please re-enter your first and last name. ")
-//   let confirmNameFlag = readlineSync.question(`Is ${senderName} correct? `).toLowerCase();
-//   if (confirmNameFlag === 'yes') {
-//     senderNameConfirm = true;
-//   }
-// }
-//
-// console.log("I got it! Great! Let's make some change. First, I'll need to where the letter is coming from.")
-//
-// let senderZipCode = readlineSync.question("First off, what's your zip code? ");
-//
-// let senderState = readlineSync.question("What state do you live in? (You can just enter the two letter abbreviation.) ")
-//
-// let senderCity = readlineSync.question(`${senderState} is awesome. What city do you live in? `);
-//
-// let senderStreet = readlineSync.question("Almost done! What is your street address? ");
-//
-// let senderAddressConfirm = readlineSync.question(`Nice work! Just to be sure, I have your address as ${senderStreet} ${senderCity} ${senderState} ${senderZipCode}. Is that correct? `)
+while (addressConfirm === undefined || addressConfirm === false) {
+  senderZipCode = readlineSync.question(`First off, what is your zip code? `);
 
-let senderStreet = "1600 E 19th St.";
-let senderCity = "Oakland";
-let senderState = "CA";
+  senderState = readlineSync.question(`What state do you live in? (You can just enter the two letter abbreviation.) `)
 
+  senderCity = readlineSync.question(`${senderState} is awesome. What city do you live in? `);
+
+  senderStreet = readlineSync.question(`Almost done! What is your street address? `);
+
+  let addressVerification = readlineSync.question(`Nice work! Just to be sure, I have your address as ${senderStreet} ${senderCity} ${senderState} ${senderZipCode}. Is that correct? `);
+
+  if (addressVerification.toLowerCase() === 'no') {
+    console.log(`Oh no! Let's try it again.`)
+    addressConfirm = false;
+  } else if (addressVerification.toLowerCase() === 'yes') {
+    addressConfirm = true;
+  } else {
+   let invalidAddressConfirmationResponse = readlineSync.question(`Hmm. I didn't catch that. Try answering with 'yes' or 'no'. Is your address ${senderStreet} ${senderCity} ${senderState} ${senderZipCode}? `);
+   if (invalidAddressConfirmationResponse.toLowerCase() === 'no') {
+     addressConfirm = false;
+   } else if (invalidAddressConfirmationResponse.toLowerCase() === 'yes') {
+     addressConfirm = true;
+   }
+ }
+}
+
+console.log(`Nice! Ok, now let's get to the good part.`);
+
+while (!validOfficialToContact) {
+  officialTitle = readlineSync.question(`Who would you like to contact? You can specificy "House", "Senate", "President", or "Governor". `);
+  if (officialTitle.toLowerCase() === 'house') {
+    officialTitle = 'House of Representatives';
+    officialTitleForResponse = 'House member,';
+    validOfficialToContact = true;
+  } else if (officialTitle.toLowerCase() === 'senate') {
+    officialTitle = 'United States Senate';
+    officialTitleForResponse = 'Senator,';
+    validOfficialToContact = true;
+  } else if (officialTitle.toLowerCase() === 'president') {
+    officialTitle = 'President of the United States';
+    officialTitleForResponse = 'President (or not),'
+    validOfficialToContact = true;
+  } else if (officialTitle.toLowerCase() === 'governor') {
+    officialTitle = 'Governor';
+    officialTitleForResponse = 'Governor,'
+    validOfficialToContact = true;
+  } else {
+    console.log(`Hmmm. I didn't get that. Please try again.`);
+  }
+}
+
+senderCity = 'Oakland';
+senderState = 'CA';
+senderStreet = '1600 E 19th St.'
 
 axios.get(`https://www.googleapis.com/civicinfo/v2/representatives?key=${API_KEY}&address=${senderStreet}%20${senderCity}%20${senderState}`)
   .then((response) => {
@@ -50,16 +90,15 @@ axios.get(`https://www.googleapis.com/civicinfo/v2/representatives?key=${API_KEY
   })
   .catch((error) => {
     console.log(error, 'Error');
+    //NEED TO HANDLE ADDRESS ERROR BETTER
   })
   .then((response) => {
-    let specificOffice;
-    apiResponse = response.data
-    // console.log('RESPONSEEEEEE:', apiResponse.offices);
+    apiResponse = response.data;
     apiResponse.offices.forEach((office) => {
-      if (office.name === 'Mayor') {
-        specificOffice = office.officialIndices[0];
+      if (office.name.includes(officialTitle)) {
+        containerForMultipleResults.push(office.officialIndices[0]);
+        electedOfficial = apiResponse.officials[containerForMultipleResults[0]].name;
       }
-    })
-    console.log('officialIndices SHOULD BE 9', specificOffice)
-    console.log('MAAYYYYYORRRR?', apiResponse.officials[specificOffice])
+    });
+    console.log(`You are represented by your ${officialTitleForResponse} ${electedOfficial}.`)
   });
