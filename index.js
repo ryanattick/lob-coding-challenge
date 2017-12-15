@@ -2,13 +2,16 @@
 
 //THINK ABOUT BREAKING THE DIFFERENT PIECES INTO DIFFERENT FILES!!
 const readlineSync = require('readline-sync');
-const {API_KEY} = require('./googleAPI.config');
+const {GOOGLE_API_KEY} = require('./API.config');
+const {LOB_API_KEY} = require('./API.config');
 const axios = require('axios');
+const Lob = require('lob')(LOB_API_KEY);
+
 
 let apiResponse, senderNameConfirm, addressConfirm, electedOfficial, senderZipCode, senderState, senderCity, senderStreet, officialTitle, validOfficialToContact, officialTitleForResponse, messageText, validMessageText, reviewMessageText;
 let containerForMultipleResults = [];
 
-// let senderName = readlineSync.question(`Hello! I'm here to help you write a letter to your legislator about an issue you care about. Let's get started. What is your first and last name? `);
+let senderName = readlineSync.question(`Hello! I'm here to help you write a letter to your legislator about an issue you care about. Let's get started. What is your first and last name? `);
 //
 // while (senderNameConfirm === undefined || senderNameConfirm === false) {
 //   let nameVerification = readlineSync.question(`It's nice to meet you ${senderName}! Did I get your name right? `);
@@ -82,9 +85,10 @@ while (!validOfficialToContact) {
 
 senderCity = 'Oakland';
 senderState = 'CA';
-senderStreet = '1600 E 19th St.'
+senderStreet = '1600 E 19th St.';
+senderZipCode = '94606';
 
-axios.get(`https://www.googleapis.com/civicinfo/v2/representatives?key=${API_KEY}&address=${senderStreet}%20${senderCity}%20${senderState}`)
+axios.get(`https://www.googleapis.com/civicinfo/v2/representatives?key=${GOOGLE_API_KEY}&address=${senderStreet}%20${senderCity}%20${senderState}`)
   .then((response) => {
     return response;
   })
@@ -126,4 +130,34 @@ axios.get(`https://www.googleapis.com/civicinfo/v2/representatives?key=${API_KEY
         messageText = readlineSync.question(`Oops! It looks like you have ${messageText.length} characters. We need to make sure we keep your message down to 500 characters or less. Please try again! `)
       }
     }
+  })
+  .then(() => {
+    Lob.letters.create({
+      description: 'Demo Letter',
+      to: {
+        name: electedOfficial,
+        address_line1: 'CHANGE',
+        address_line2: 'CHANGE',
+        address_city: 'CHANGE',
+        address_state: 'CA',
+        address_zip: '94606',
+        address_country: 'US',
+      },
+      from: {
+        name: senderName,
+        address_line1: senderStreet,
+        address_line2: 'CHANGE',
+        address_city: senderCity,
+        address_state: senderState,
+        address_zip: senderZipCode,
+        address_country: 'US',
+      },
+      file: '<html style="padding-top: 3in; margin: .5in;">{{text}}</html>',
+      merge_variables: {
+        text: messageText
+      },
+      color: true
+    }, function (err, res) {
+      console.log(err, res);
+    });
   });

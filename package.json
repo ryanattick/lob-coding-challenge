@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.17.1",
+    "lob": "^5.0.0",
     "readline-sync": "^1.4.7"
   }
 }
