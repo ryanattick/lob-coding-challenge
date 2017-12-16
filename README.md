@@ -4,10 +4,12 @@ This project was developed in order to allow users to utilize the command line t
 
 ## Set Up
 There are several steps for the setup and use of this project:
-- clone a copy of the project to your machine
-- navigate to the project from your command line
-- run npm install
-- run ./index.js
+1. Clone a copy of the project to your machine.
+2. Create a new file for the necessary API keys for Lob and Google Civic Information based on the API.config.js example provided.
+3. Fill in your copy of each API key in that new file.
+4. Navigate to the project from your command line.
+5. Run $ npm install.
+6. Run $ ./index.js.
 
 ## Built With
 - JavaScript
