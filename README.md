@@ -9,7 +9,7 @@ There are several steps for the setup and use of this project. They are as follo
 3. Fill in your copy of each API key in that new file.
 4. Navigate to the project from your command line.
 5. Run $ npm install.
-6. Run $ ./index.js.
+6. Run $ node index.js.
 
 ## Built With
 - Javascript
